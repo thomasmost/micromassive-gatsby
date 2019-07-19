@@ -11,3 +11,17 @@
     font-weight: 600;
   }
 }
+
+.colLeft {
+  width: 66%;
+  display: inline-block;
+}
+.colRight {
+  width: 34%;
+  display: inline-block;
+}
+.clear {
+  &:after {
+    clear: both
+  }
+}
