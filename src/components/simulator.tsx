@@ -5,7 +5,7 @@ import { useMarketParticipants } from "../lib/market-participants";
 import { useEnterprises } from "../lib/enterprises";
 import { processClick } from "../lib/process-click";
 import { useInterval } from "../lib/use-interval";
-import { useActivityStream } from "../lib/activity-stream";
+import { useActivityStream, IActivity } from "../lib/activity-stream";
 
 const startSimulation = (
   numberParticipants: number,
@@ -20,6 +20,24 @@ const StatBlock = ({label, value}) => (
     <div>{value}</div>
   </div>
 )
+
+const RecentActivities = ({recentActivities} : {recentActivities: IActivity[]}) => {
+
+  const activityBlocks = recentActivities.map((activity) => (
+    <div>
+      {activity.text}
+    </div>
+  ))
+
+  return (
+    <div>
+      <label>
+        Click {recentActivities[0].click}
+      </label>
+      {activityBlocks}
+    </div>
+  )
+}
 
 const Simulator = () => {
   const numberParticipants = 100;
@@ -64,6 +82,9 @@ const Simulator = () => {
     setClicks(nextClick);
     processClick(nextClick, participants, enterprises, startEnterprise, addEmployee);
   }
+  
+  const mostRecentClick = numClicks;
+  const recentActivities = activities.filter((activity) => activity.click === mostRecentClick);
 
   return (
     <div className={style.simulator}>
@@ -72,7 +93,7 @@ const Simulator = () => {
         <StatBlock label="# Enterprises" value={enterprises.length} />
       </div>
       <div className={style.colRight}>
-        {Boolean(activities.length) && <div><label>Click {activities[activities.length - 1].click}</label><div>{activities[activities.length - 1].text}</div></div>}
+        {Boolean(recentActivities.length) && <RecentActivities recentActivities={recentActivities} />}
       </div>
       <div className={style.clear}/>
       {!simulationInProgress && <button onClick={start}>Start Simulation</button>}
