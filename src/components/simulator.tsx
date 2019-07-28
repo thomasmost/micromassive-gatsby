@@ -1,11 +1,16 @@
 import React, { useState, useRef, useEffect } from "react"
 import style from "./simulator.module.scss"
 
+import { connect } from 'react-redux';
+
 import { useMarketParticipants } from "../lib/market-participants";
 import { useEnterprises } from "../lib/enterprises";
 import { processClick } from "../lib/process-click";
 import { useInterval } from "../lib/use-interval";
 import { useActivityStream, IActivity } from "../lib/activity-stream";
+import { IAppStateContainer } from "../store/reducers";
+import { InitializeSimulation, ShutdownSimulation } from "../store/actions";
+import { Dispatch } from "redux";
 
 const startSimulation = (
   numberParticipants: number,
@@ -39,9 +44,19 @@ const RecentActivities = ({recentActivities} : {recentActivities: IActivity[]}) 
   )
 }
 
-const Simulator = () => {
+interface ISimulatorProps {
+  simulationInProgress: boolean;
+  initializeSimulation: () => void;
+  shutdownSimulation: () => void;
+}
+
+const Simulator = (props) => {
+  const {
+    simulationInProgress,
+    initializeSimulation,
+    shutdownSimulation
+  } = props;
   const numberParticipants = 100;
-  const [simulationInProgress, toggleSimulation] = useState<boolean>(false);
   const [playSpeed, adjustPlaySpeed] = useState<number>(null);
   const [numClicks, setClicks] = useState<number>(0);
   const {activities, addActivity, resetActivitySTream} = useActivityStream();
@@ -57,12 +72,12 @@ const Simulator = () => {
   }, playSpeed);
 
   const stop = () => {
-    toggleSimulation(false);
+    shutdownSimulation();
     adjustPlaySpeed(null)
   }
 
   const start = () => {
-    toggleSimulation(true);
+    initializeSimulation();
     resetEnterprises();
     resetParticipants();
     resetActivitySTream();
@@ -104,4 +119,13 @@ const Simulator = () => {
     </div>
   );
 }
-export default Simulator
+export default connect((state: IAppStateContainer) => (
+  {
+    simulationInProgress: state.simulator.initialized
+  }
+),(dispatch: Dispatch) => (
+  {
+    initializeSimulation: () => dispatch(new InitializeSimulation()),
+    shutdownSimulation: () => dispatch(new ShutdownSimulation()),
+  }
+))(Simulator)
