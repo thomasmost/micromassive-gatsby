@@ -46,6 +46,7 @@ const RecentActivities = ({recentActivities} : {recentActivities: IActivity[]}) 
 
 interface ISimulatorProps {
   simulationInProgress: boolean;
+  lastClick: number;
   initializeSimulation: () => void;
   shutdownSimulation: () => void;
 }
@@ -54,16 +55,16 @@ const Simulator = (props) => {
   const {
     simulationInProgress,
     initializeSimulation,
-    shutdownSimulation
+    shutdownSimulation,
+    lastClick,
   } = props;
   const numberParticipants = 100;
   const [playSpeed, adjustPlaySpeed] = useState<number>(null);
-  const [numClicks, setClicks] = useState<number>(0);
   const {activities, addActivity, resetActivitySTream} = useActivityStream();
   const {enterprises, startEnterprise, addEmployee, resetEnterprises} = useEnterprises(addActivity);
   const {participants, createParticipants, resetParticipants} = useMarketParticipants();
 
-  const nextClick = numClicks + 1;
+  const nextClick = lastClick + 1;
 
 
   useInterval(() => {
@@ -97,9 +98,8 @@ const Simulator = (props) => {
     setClicks(nextClick);
     processClick(nextClick, participants, enterprises, startEnterprise, addEmployee);
   }
-  
-  const mostRecentClick = numClicks;
-  const recentActivities = activities.filter((activity) => activity.click === mostRecentClick);
+
+  const recentActivities = activities.filter((activity) => activity.click === lastClick);
 
   return (
     <div className={style.simulator}>
@@ -121,7 +121,8 @@ const Simulator = (props) => {
 }
 export default connect((state: IAppStateContainer) => (
   {
-    simulationInProgress: state.simulator.initialized
+    simulationInProgress: state.simulator.initialized,
+    lastClick: state.simulator.lastClick
   }
 ),(dispatch: Dispatch) => (
   {

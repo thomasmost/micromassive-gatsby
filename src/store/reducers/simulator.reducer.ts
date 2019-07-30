@@ -4,16 +4,18 @@ import { Reducer } from "react";
 interface ISimulatorState {
   initialized: boolean;
   playing: boolean;
+  lastClick: number;
 }
 
 export const simulatorReducer: Reducer<ISimulatorState, SimulatorAction> =
 (state = {
   initialized: false,
-  playing: false
+  playing: false,
+  lastClick: 0
 }, action) => {
   switch (action.type) {
     case INITIALIZE_SIMULATION:
-      return {...state, initialized: true}
+      return {...state, initialized: true, lastClick: 0}
     case SHUTDOWN_SIMULATION:
       return {...state, initialized: false}
     case PLAY: {
