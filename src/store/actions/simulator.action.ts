@@ -1,3 +1,4 @@
+import { ISimulationConfig } from "../../models/simulation-config";
 
 export const INITIALIZE_SIMULATION = 'INITIALIZE_SIMULATION';
 export const SHUTDOWN_SIMULATION = 'SHUTDOWN_SIMULATION';
@@ -8,7 +9,7 @@ export const PROCESS_CLICK = 'PROCESS_CLICK';
 export class InitializeSimulation {
   readonly type = INITIALIZE_SIMULATION;
   constructor (
-    public numPartipants: number
+    public config?: ISimulationConfig
   ) {}
 }
 

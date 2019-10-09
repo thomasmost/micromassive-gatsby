@@ -1,107 +1,43 @@
 import { INITIALIZE_SIMULATION, SimulatorAction, SHUTDOWN_SIMULATION, PLAY, PAUSE, PROCESS_CLICK } from "../actions";
 import { Reducer } from "react";
-import { IMarketParticipant } from "../../lib/market-participants";
-import { IEnterprise } from "../../lib/enterprises";
+import { IMarketParticipant } from "../../models/market-participant";
+import { IEnterprise } from "../../models/enterprise";
 
 import {v4 as uuid} from 'uuid';
 import * as faker from 'faker';
-import { IActivity } from "../../lib/activity-stream";
 import { processClick } from "../../lib/process-click";
-
-interface IEntity {
-  id: string;
-}
-
-interface IEntityStore<T extends IEntity> {
-  list: T[];
-  byId: Record<string, T>;
-}
-
-export class EntityStore<T extends IEntity> implements IEntityStore<T> {
-  list: T[];
-  byId: Record<string, T>;
-  constructor() {
-    this.list = [];
-    this.byId = {};
-  };
-
-  public initialize(entities: T[]) {
-    if (this.list.length) {
-      throw Error('Would not expect to initialize a non-empty store');
-    }
-    this.list = [];
-    this.byId = {};
-    for (const entity of entities) {
-      this.list.push(entity)
-      this.byId[entity.id] = entity;
-    }
-    return this;
-  }
-
-  public add(entity: T) {
-    this.list = [...this.list, entity];
-    this.byId = {...this.byId};
-    this.byId[entity.id] = entity;
-    return this;
-  }
-
-  public remove(id: string) {
-    const newList = [];
-    for (const item of this.list) {
-      if (item.id !== id) {
-        newList.push(item);
-      }
-    }
-    this.list = newList;
-    this.byId = {...this.byId};
-    delete this.byId[id];
-    return this;
-  }
-
-  public reset() {
-    this.list = [];
-    this.byId = {};
-    return this;
-  }
-
-}
-
-// class EmployeeStore {
-//   employeeIdsByEnterpriseId: Record<string, string[]>
-//   enterpriseIdByEmployeeId: Record<string, string>
-// }
-
-interface ISimulationState {
-  initialized: boolean;
-  playSpeed: number;
-  lastClick: number;
-  activities: IActivity[];
-  participants: EntityStore<IMarketParticipant>;
-  enterprises: EntityStore<IEnterprise>;
-}
+import { ISimulationState } from "../../models/simulation-state";
+import { EntityStore } from "../../models/entity-store";
+import { defaultConfiguration } from "../../models/simulation-config";
 
 export const initialState: ISimulationState = {
   initialized: false,
   playSpeed: null,
   lastClick: 0,
+  config: defaultConfiguration,
   activities: [],
   participants: new EntityStore<IMarketParticipant>(),
   enterprises: new EntityStore<IEnterprise>()
 }
 
 export const simulationReducer: Reducer<ISimulationState, SimulatorAction> =
-(state = initialState, action) => {
+(state, action) => {
   switch (action.type) {
     case INITIALIZE_SIMULATION: {
       const participants = new EntityStore<IMarketParticipant>();
+      const actionConfig = action.config || {};
+      const config = { ...defaultConfiguration, ...actionConfig};
 
       let newParticipants: IMarketParticipant[] = [];
-      for (let i = 0; i < action.numPartipants; i++) {
+      for (let i = 0; i < config.numberOfParticipants; i++) {
         const id = uuid();
         const name = faker.name.findName();
         newParticipants.push({
           id,
-          name
+          name,
+          capital: 10,
+          expiringProducts: [],
+          salePriceForExpiringProducts: null
         });
       }
       participants.initialize(newParticipants);
@@ -113,6 +49,7 @@ export const simulationReducer: Reducer<ISimulationState, SimulatorAction> =
         initialized: true,
         playSpeed: null,
         lastClick: 0,
+        config,
         activities,
         participants,
         enterprises
@@ -146,7 +83,12 @@ export const simulationReducer: Reducer<ISimulationState, SimulatorAction> =
         newActivities,
         participantStore,
         enterpriseStore
-      } = processClick(click, state.participants, state.enterprises);
+      } = processClick(
+          click,
+          state.config,
+          state.participants,
+          state.enterprises
+        );
       return {
         ...state,
         lastClick: click,

@@ -2,7 +2,7 @@ import React, { useReducer } from "react"
 import style from "./simulator.module.scss"
 
 import { useInterval } from "../lib/use-interval";
-import { IActivity } from "../lib/activity-stream";
+import { IActivity } from "../models/activity-stream";
 import { stateReducer } from "../store/reducers";
 import { InitializeSimulation, ShutdownSimulation, ProcessClick, Play, Pause } from "../store/actions";
 import { initialState } from "../store/reducers/simulation.reducer";
@@ -49,7 +49,6 @@ const Simulator = () => {
 
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
-  const numberParticipants = 100;
   const {
     initialized,
     playSpeed,
@@ -69,7 +68,7 @@ const Simulator = () => {
   }
 
   const start = () => {
-    dispatch(new InitializeSimulation(numberParticipants))
+    dispatch(new InitializeSimulation());
   }
 
   const play = () => {
@@ -93,7 +92,9 @@ const Simulator = () => {
         <StatBlock label="# Enterprises" value={enterprises.length} />
       </div>
       <div className={style.colRight}>
-        {Boolean(recentActivities.length) && <RecentActivities recentActivities={recentActivities} />}
+        <div className={style.activityStream}>
+          {Boolean(recentActivities.length) && <RecentActivities recentActivities={recentActivities} />}
+        </div>
       </div>
       <div className={style.clear}/>
       {!initialized && <button onClick={start}>Start Simulation</button>}
