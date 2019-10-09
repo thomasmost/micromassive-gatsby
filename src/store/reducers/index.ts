@@ -1,12 +1,10 @@
 import { combineReducers } from 'redux';
 
-import { simulatorReducer } from "./simulator.reducer";
+import { simulationReducer } from "./simulation.reducer";
 
 export interface IAppStateContainer {
-  simulator: ReturnType<typeof simulatorReducer>;
+  simulation: ReturnType<typeof simulationReducer>;
 }
 
 // eslint-disable-next-line no-restricted-syntax
-export default combineReducers<IAppStateContainer>({
-  simulator: simulatorReducer
-});
+export const stateReducer = simulationReducer;

@@ -3,11 +3,13 @@ export const INITIALIZE_SIMULATION = 'INITIALIZE_SIMULATION';
 export const SHUTDOWN_SIMULATION = 'SHUTDOWN_SIMULATION';
 export const PLAY = 'PLAY';
 export const PAUSE = 'PAUSE';
-export const STEP_FORWARD = 'STEP_FORWARD';
+export const PROCESS_CLICK = 'PROCESS_CLICK';
 
 export class InitializeSimulation {
   readonly type = INITIALIZE_SIMULATION;
-  constructor () {}
+  constructor (
+    public numPartipants: number
+  ) {}
 }
 
 export class ShutdownSimulation {
@@ -25,8 +27,9 @@ export class Pause {
   constructor () {}
 }
 
-export class StepForward {
-  readonly type = STEP_FORWARD;
+
+export class ProcessClick {
+  readonly type = PROCESS_CLICK;
   constructor () {}
 }
 
@@ -36,4 +39,4 @@ export type SimulatorAction =
   ShutdownSimulation |
   Play |
   Pause |
-  StepForward;
+  ProcessClick;

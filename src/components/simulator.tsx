@@ -1,16 +1,11 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useReducer } from "react"
 import style from "./simulator.module.scss"
 
-import { connect } from 'react-redux';
-
-import { useMarketParticipants } from "../lib/market-participants";
-import { useEnterprises } from "../lib/enterprises";
-import { processClick } from "../lib/process-click";
 import { useInterval } from "../lib/use-interval";
-import { useActivityStream, IActivity } from "../lib/activity-stream";
-import { IAppStateContainer } from "../store/reducers";
-import { InitializeSimulation, ShutdownSimulation } from "../store/actions";
-import { Dispatch } from "redux";
+import { IActivity } from "../lib/activity-stream";
+import { stateReducer } from "../store/reducers";
+import { InitializeSimulation, ShutdownSimulation, ProcessClick, Play, Pause } from "../store/actions";
+import { initialState } from "../store/reducers/simulation.reducer";
 
 const startSimulation = (
   numberParticipants: number,
@@ -46,57 +41,47 @@ const RecentActivities = ({recentActivities} : {recentActivities: IActivity[]}) 
 
 interface ISimulatorProps {
   simulationInProgress: boolean;
-  lastClick: number;
   initializeSimulation: () => void;
   shutdownSimulation: () => void;
 }
 
-const Simulator = (props) => {
-  const {
-    simulationInProgress,
-    initializeSimulation,
-    shutdownSimulation,
-    lastClick,
-  } = props;
+const Simulator = () => {
+
+  const [state, dispatch] = useReducer(stateReducer, initialState);
+
   const numberParticipants = 100;
-  const [playSpeed, adjustPlaySpeed] = useState<number>(null);
-  const {activities, addActivity, resetActivitySTream} = useActivityStream();
-  const {enterprises, startEnterprise, addEmployee, resetEnterprises} = useEnterprises(addActivity);
-  const {participants, createParticipants, resetParticipants} = useMarketParticipants();
-
-  const nextClick = lastClick + 1;
-
+  const {
+    initialized,
+    playSpeed,
+    lastClick,
+    activities
+  } = state;
+  
+  const participants = state.participants.list;
+  const enterprises = state.enterprises.list;
 
   useInterval(() => {
-    setClicks(nextClick);
-    processClick(nextClick, participants, enterprises, startEnterprise, addEmployee);
+    dispatch(new ProcessClick());
   }, playSpeed);
 
   const stop = () => {
-    shutdownSimulation();
-    adjustPlaySpeed(null)
+    dispatch(new ShutdownSimulation());
   }
 
   const start = () => {
-    initializeSimulation();
-    resetEnterprises();
-    resetParticipants();
-    resetActivitySTream();
-    setClicks(0);
-    startSimulation(numberParticipants, createParticipants);
+    dispatch(new InitializeSimulation(numberParticipants))
   }
 
   const play = () => {
-    adjustPlaySpeed(1000)
+    dispatch(new Play())
   }
 
   const pause = () => {
-    adjustPlaySpeed(null)
+    dispatch(new Pause())
   }
 
   const click = () => {
-    setClicks(nextClick);
-    processClick(nextClick, participants, enterprises, startEnterprise, addEmployee);
+    dispatch(new ProcessClick())
   }
 
   const recentActivities = activities.filter((activity) => activity.click === lastClick);
@@ -111,22 +96,13 @@ const Simulator = (props) => {
         {Boolean(recentActivities.length) && <RecentActivities recentActivities={recentActivities} />}
       </div>
       <div className={style.clear}/>
-      {!simulationInProgress && <button onClick={start}>Start Simulation</button>}
-      {simulationInProgress && <button onClick={stop}>End Simulation</button>}
-      {Boolean(simulationInProgress && !playSpeed) && <button onClick={play}>Play</button>}
-      {Boolean(simulationInProgress && playSpeed) && <button onClick={pause}>Pause</button>}
-      {simulationInProgress && <button onClick={click}>Step Forward</button>}
+      {!initialized && <button onClick={start}>Start Simulation</button>}
+      {initialized && <button onClick={stop}>End Simulation</button>}
+      {Boolean(initialized && !playSpeed) && <button onClick={play}>Play</button>}
+      {Boolean(initialized && playSpeed) && <button onClick={pause}>Pause</button>}
+      {initialized && <button onClick={click}>Step Forward</button>}
     </div>
   );
 }
-export default connect((state: IAppStateContainer) => (
-  {
-    simulationInProgress: state.simulator.initialized,
-    lastClick: state.simulator.lastClick
-  }
-),(dispatch: Dispatch) => (
-  {
-    initializeSimulation: () => dispatch(new InitializeSimulation()),
-    shutdownSimulation: () => dispatch(new ShutdownSimulation()),
-  }
-))(Simulator)
+
+export default Simulator;
