@@ -12,7 +12,7 @@ A micro-economic simulator on a massive scale.
 
 ## Intended Roadmap
 
-- [ ] Migrate from the clusterduck of state effects to redux
+- [x] Migrate from the clusterduck of state effects to useReducer
 - [ ] Introduce capital distribution for market participants
 - [ ] Introduce purchases and QOL/Value indexes
 
