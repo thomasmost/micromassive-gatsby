@@ -13,8 +13,13 @@ A micro-economic simulator on a massive scale.
 ## Intended Roadmap
 
 - [x] Migrate from the clusterduck of state effects to useReducer
-- [ ] Introduce capital distribution for market participants
+- [x] Introduce capital distribution for market participants
 - [ ] Introduce purchases and QOL/Value indexes
+- [ ] Give Market Participants skills and improve skills over time
+- [ ] Enterprises should produce products at a factor of their # of employees/employee skill
+- [ ] Enterprises should pay their employees 
+- [ ] Replace Math.random with a deterministic randomizer based on seed phrase/number
+- [ ] Allow configuration/seed phrase to be edited at simulation start
 
 ## 🚀 Developed with Gatsby
 
