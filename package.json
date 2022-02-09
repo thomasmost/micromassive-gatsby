@@ -18,7 +18,7 @@
     "gatsby-plugin-typescript": "^2.0.6",
     "gatsby-source-filesystem": "^2.1.5",
     "gatsby-transformer-sharp": "^2.1.13",
-    "node-sass": "^4.11.0",
+    "node-sass": "^7.0.0",
     "prop-types": "^15.6.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
